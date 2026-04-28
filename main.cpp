@@ -8,15 +8,15 @@ std::string HHIpaths[] = {
     "/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-05/HHIH5_2025-03-28.parquet",
     "/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-06/HHIH5_2025-03-28.parquet",
     "/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-07/HHIH5_2025-03-28.parquet",
-    "/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-08/HHIH5_2025-03-28.parquet",
-    "/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-09/HHIH5_2025-03-28.parquet",
+    //"/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-08/HHIH5_2025-03-28.parquet",
+    //"/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-09/HHIH5_2025-03-28.parquet",
     "/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-10/HHIH5_2025-03-28.parquet",
     "/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-11/HHIH5_2025-03-28.parquet",
     "/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-12/HHIH5_2025-03-28.parquet",
     "/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-13/HHIH5_2025-03-28.parquet",
     "/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-14/HHIH5_2025-03-28.parquet",
-    "/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-15/HHIH5_2025-03-28.parquet",
-    "/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-16/HHIH5_2025-03-28.parquet",
+    //"/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-15/HHIH5_2025-03-28.parquet",
+    //"/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-16/HHIH5_2025-03-28.parquet",
     "/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-17/HHIH5_2025-03-28.parquet",
     "/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-18/HHIH5_2025-03-28.parquet",
     "/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-19/HHIH5_2025-03-28.parquet",
@@ -100,7 +100,7 @@ int main() {
     }
     for (int i=0; i<BINS; ++i) {
 
-        int rowSum = 0;
+        double rowSum = 0;
         for (int j=0; j<BINS; ++j) {
             rowSum += frequencyMatrix[i][j];
         }
