@@ -24,12 +24,7 @@ std::string HHIpaths[] = {
 
 };
 
-
-
-
 static int STEPS = 10;
-
-
 
 int imbalanceBin(double imbalance) {
     int imbalanceBin =0;
@@ -85,12 +80,10 @@ int main() {
             double midPrice = (bidPrice+askPrice)/2;
             double midPriceH = (bidPriceH+askPriceH)/2;
 
-
             double imbalance = (bidVol) / (bidVol+askVol);
             double imbalanceH = (bidVolH) / (bidVolH+askVolH);
 
             if (imbalanceBin(imbalanceH) != imbalanceBin(imbalance)) {
-
                 frequencyMatrix[imbalanceBin(imbalance)][imbalanceBin(imbalanceH)] +=1;
                 midChangeMatrix[imbalanceBin(imbalanceH)] += (midPriceH - midPrice);
             }
@@ -98,7 +91,6 @@ int main() {
     }
 
     //probabilities
-
     for (int i = 0; i < 10; ++i) {
         double rowCount = 0;
         for (int j = 0; j < 10; ++j) rowCount += frequencyMatrix[i][j];
