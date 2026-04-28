@@ -1,0 +1,3 @@
+/home/loki/CLionProjects/osmiArrow/build/CMakeFiles/osmiArrow.dir
+/home/loki/CLionProjects/osmiArrow/build/CMakeFiles/edit_cache.dir
+/home/loki/CLionProjects/osmiArrow/build/CMakeFiles/rebuild_cache.dir

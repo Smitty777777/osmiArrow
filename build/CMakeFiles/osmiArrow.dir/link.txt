@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/osmiArrow.dir/link.d CMakeFiles/osmiArrow.dir/main.cpp.o -o osmiArrow  /usr/lib/x86_64-linux-gnu/libparquet.so.2300.1.0 /usr/lib/x86_64-linux-gnu/libarrow.so.2300.1.0 -ldl -lrt
