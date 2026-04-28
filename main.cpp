@@ -16,8 +16,6 @@ std::string HHIpaths[] = {
     "/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-17/HHIH5_2025-03-28.parquet",
     "/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-18/HHIH5_2025-03-28.parquet",
     "/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-19/HHIH5_2025-03-28.parquet",
-
-
 };
 
 static int STEPS = 10;
