@@ -25,18 +25,20 @@ std::string HHIpaths[] = {
 };
 
 static int STEPS = 10;
+constexpr static int BINS  = 21;
 
 int imbalanceBin(double imbalance) {
-    int imbalanceBin =0;
-    imbalanceBin = std::floor(imbalance*10);
-    return imbalanceBin ==10 ? 9 : imbalanceBin;
+
+    int bin = (int)(imbalance * BINS);
+    return bin >= BINS ? BINS - 1 : bin;
+
 }
-std::array<std::array<double,10>,10> multiplyMatrix(std::array<std::array<double,10>,10>& matrix) {
-    std::array<std::array<double,10>,10> result{};
-    for (int i=0; i<10; ++i) {
-        for (int j=0; j<10; ++j) {
+std::array<std::array<double,BINS>,BINS> multiplyMatrix(const std::array<std::array<double,BINS>,BINS>& matrix) {
+    std::array<std::array<double,BINS>,BINS> result{};
+    for (int i=0; i<BINS; ++i) {
+        for (int j=0; j<BINS; ++j) {
             result[i][j] = 0;
-            for (int k=0; k<10; ++k) {
+            for (int k=0; k<BINS; ++k) {
                 result[i][j] += matrix[i][k] * matrix[k][j];
             }
         }
@@ -46,12 +48,12 @@ std::array<std::array<double,10>,10> multiplyMatrix(std::array<std::array<double
 
 int main() {
 
-    std::array<std::array<double,10>,10> frequencyMatrix = {};
-    std::array<double,10> midChangeMatrix = {};
-    std::array<std::pair<int, double>, 10> adjustmentGrid = {};
+    std::array<std::array<double,BINS>,BINS> frequencyMatrix = {};
+    std::array<double,BINS> midChangeMatrix = {};
+    std::array<std::pair<int, double>, BINS> adjustmentGrid = {};
     for (std::string file : HHIpaths) {
         std::cout << file << std::endl;
-        auto loaded = osmi::Table::from_parquet("/media/jewels/storage/sharing_data/HK_data/Depth data/2025-03-04/HHIH5_2025-03-28.parquet");
+        auto loaded = osmi::Table::from_parquet(file);
 
         auto sub = loaded.select({"BidQuantity_1", "AskQuantity_1", "BidPrice_1", "AskPrice_1"});
         //sub.add_column<double>("doubled_x", [](const osmi::Row& r) { return r.get<double>("x") * 2.0; });
@@ -91,27 +93,27 @@ int main() {
     }
 
     //probabilities
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < BINS; ++i) {
         double rowCount = 0;
-        for (int j = 0; j < 10; ++j) rowCount += frequencyMatrix[i][j];
+        for (int j = 0; j < BINS; ++j) rowCount += frequencyMatrix[i][j];
         if (rowCount > 0) midChangeMatrix[i] /= rowCount;
     }
-    for (int i=0; i<10; ++i) {
+    for (int i=0; i<BINS; ++i) {
 
         int rowSum = 0;
-        for (int j=0; j<10; ++j) {
+        for (int j=0; j<BINS; ++j) {
             rowSum += frequencyMatrix[i][j];
         }
-        for (int j=0; j<10; ++j) {
+        for (int j=0; j<BINS; ++j) {
                  frequencyMatrix[i][j] /= rowSum;
         }
     }
-    for (int i=0; i<10; ++i) {
+    for (int i=0; i<BINS; ++i) {
 
         double Gstar = 0;
         auto stoppingTimeMatrix = frequencyMatrix;
         for (int j=0; j<STEPS; ++j) {
-            for (int k=0; k<10; ++k) {
+            for (int k=0; k<BINS; ++k) {
                Gstar+= (midChangeMatrix[k] *stoppingTimeMatrix[i][k]);
             }
             stoppingTimeMatrix = multiplyMatrix(stoppingTimeMatrix);
