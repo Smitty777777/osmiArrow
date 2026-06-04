@@ -2,11 +2,15 @@ osmiArrow: \
   /usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/Scrt1.o \
   /usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/crti.o \
   /usr/lib/gcc/x86_64-linux-gnu/15/crtbeginS.o \
-  CMakeFiles/osmiArrow.dir/main.cpp.o \
+  CMakeFiles/osmiArrow.dir/mainNikkei.cpp.o \
+  /home/loki/intel/oneapi/mkl/2026.0/lib/libmkl_rt.so \
+  /home/loki/intel/oneapi/compiler/latest/lib/libiomp5.so \
+  /usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/libpthread.a \
+  /usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/libdl.a \
   /usr/lib/x86_64-linux-gnu/libparquet.so.2300.1.0 \
   /usr/lib/x86_64-linux-gnu/libarrow.so.2300.1.0 \
-  /usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/libdl.a \
   /usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/librt.a \
+  /usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/libdl.a \
   /usr/lib/gcc/x86_64-linux-gnu/15/libstdc++.so \
   /usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/libm.so \
   /usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/libm.so \
@@ -33,6 +37,13 @@ osmiArrow: \
   /usr/lib/gcc/x86_64-linux-gnu/15/libgcc.a \
   /usr/lib/gcc/x86_64-linux-gnu/15/crtendS.o \
   /usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/crtn.o \
+  /usr/lib/i386-linux-gnu/libdl.so.2 \
+  /usr/lib/x86_64-linux-gnu/libdl.so.2 \
+  /usr/lib/i386-linux-gnu/librt.so.1 \
+  /usr/lib/x86_64-linux-gnu/librt.so.1 \
+  /usr/lib/i386-linux-gnu/libpthread.so.0 \
+  /usr/lib/x86_64-linux-gnu/libpthread.so.0 \
+  /lib64/ld-linux-x86-64.so.2 \
   /usr/lib/i386-linux-gnu/libcrypto.so.3 \
   /usr/lib/x86_64-linux-gnu/libcrypto.so.3 \
   /usr/lib/x86_64-linux-gnu/libthrift-0.19.0.so \
@@ -87,8 +98,6 @@ osmiArrow: \
   /usr/lib/x86_64-linux-gnu/libz.so.1 \
   /usr/lib/i386-linux-gnu/libzstd.so.1 \
   /usr/lib/x86_64-linux-gnu/libzstd.so.1 \
-  /usr/lib/x86_64-linux-gnu/libm.so.6 \
-  /lib64/ld-linux-x86-64.so.2 \
   /usr/lib/i386-linux-gnu/liblzma.so.5 \
   /usr/lib/x86_64-linux-gnu/liblzma.so.5 \
   /usr/lib/x86_64-linux-gnu/libabsl_crc_internal.so.20240722 \
@@ -155,15 +164,23 @@ osmiArrow: \
 
 /usr/lib/gcc/x86_64-linux-gnu/15/crtbeginS.o:
 
-CMakeFiles/osmiArrow.dir/main.cpp.o:
+CMakeFiles/osmiArrow.dir/mainNikkei.cpp.o:
+
+/home/loki/intel/oneapi/mkl/2026.0/lib/libmkl_rt.so:
+
+/home/loki/intel/oneapi/compiler/latest/lib/libiomp5.so:
+
+/usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/libpthread.a:
+
+/usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/libdl.a:
 
 /usr/lib/x86_64-linux-gnu/libparquet.so.2300.1.0:
 
 /usr/lib/x86_64-linux-gnu/libarrow.so.2300.1.0:
 
-/usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/libdl.a:
-
 /usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/librt.a:
+
+/usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/libdl.a:
 
 /usr/lib/gcc/x86_64-linux-gnu/15/libstdc++.so:
 
@@ -216,6 +233,20 @@ CMakeFiles/osmiArrow.dir/main.cpp.o:
 /usr/lib/gcc/x86_64-linux-gnu/15/crtendS.o:
 
 /usr/lib/gcc/x86_64-linux-gnu/15/../../../x86_64-linux-gnu/crtn.o:
+
+/usr/lib/i386-linux-gnu/libdl.so.2:
+
+/usr/lib/x86_64-linux-gnu/libdl.so.2:
+
+/usr/lib/i386-linux-gnu/librt.so.1:
+
+/usr/lib/x86_64-linux-gnu/librt.so.1:
+
+/usr/lib/i386-linux-gnu/libpthread.so.0:
+
+/usr/lib/x86_64-linux-gnu/libpthread.so.0:
+
+/lib64/ld-linux-x86-64.so.2:
 
 /usr/lib/i386-linux-gnu/libcrypto.so.3:
 
@@ -324,10 +355,6 @@ CMakeFiles/osmiArrow.dir/main.cpp.o:
 /usr/lib/i386-linux-gnu/libzstd.so.1:
 
 /usr/lib/x86_64-linux-gnu/libzstd.so.1:
-
-/usr/lib/x86_64-linux-gnu/libm.so.6:
-
-/lib64/ld-linux-x86-64.so.2:
 
 /usr/lib/i386-linux-gnu/liblzma.so.5:
 

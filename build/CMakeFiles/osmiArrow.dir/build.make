@@ -72,30 +72,31 @@ include CMakeFiles/osmiArrow.dir/flags.make
 CMakeFiles/osmiArrow.dir/codegen:
 .PHONY : CMakeFiles/osmiArrow.dir/codegen
 
-CMakeFiles/osmiArrow.dir/main.cpp.o: CMakeFiles/osmiArrow.dir/flags.make
-CMakeFiles/osmiArrow.dir/main.cpp.o: /home/loki/CLionProjects/osmiArrow/main.cpp
-CMakeFiles/osmiArrow.dir/main.cpp.o: CMakeFiles/osmiArrow.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/loki/CLionProjects/osmiArrow/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/osmiArrow.dir/main.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/osmiArrow.dir/main.cpp.o -MF CMakeFiles/osmiArrow.dir/main.cpp.o.d -o CMakeFiles/osmiArrow.dir/main.cpp.o -c /home/loki/CLionProjects/osmiArrow/main.cpp
+CMakeFiles/osmiArrow.dir/mainNikkei.cpp.o: CMakeFiles/osmiArrow.dir/flags.make
+CMakeFiles/osmiArrow.dir/mainNikkei.cpp.o: /home/loki/CLionProjects/osmiArrow/mainNikkei.cpp
+CMakeFiles/osmiArrow.dir/mainNikkei.cpp.o: CMakeFiles/osmiArrow.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/loki/CLionProjects/osmiArrow/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/osmiArrow.dir/mainNikkei.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/osmiArrow.dir/mainNikkei.cpp.o -MF CMakeFiles/osmiArrow.dir/mainNikkei.cpp.o.d -o CMakeFiles/osmiArrow.dir/mainNikkei.cpp.o -c /home/loki/CLionProjects/osmiArrow/mainNikkei.cpp
 
-CMakeFiles/osmiArrow.dir/main.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/osmiArrow.dir/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/loki/CLionProjects/osmiArrow/main.cpp > CMakeFiles/osmiArrow.dir/main.cpp.i
+CMakeFiles/osmiArrow.dir/mainNikkei.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/osmiArrow.dir/mainNikkei.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/loki/CLionProjects/osmiArrow/mainNikkei.cpp > CMakeFiles/osmiArrow.dir/mainNikkei.cpp.i
 
-CMakeFiles/osmiArrow.dir/main.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/osmiArrow.dir/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/loki/CLionProjects/osmiArrow/main.cpp -o CMakeFiles/osmiArrow.dir/main.cpp.s
+CMakeFiles/osmiArrow.dir/mainNikkei.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/osmiArrow.dir/mainNikkei.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/loki/CLionProjects/osmiArrow/mainNikkei.cpp -o CMakeFiles/osmiArrow.dir/mainNikkei.cpp.s
 
 # Object files for target osmiArrow
 osmiArrow_OBJECTS = \
-"CMakeFiles/osmiArrow.dir/main.cpp.o"
+"CMakeFiles/osmiArrow.dir/mainNikkei.cpp.o"
 
 # External object files for target osmiArrow
 osmiArrow_EXTERNAL_OBJECTS =
 
-osmiArrow: CMakeFiles/osmiArrow.dir/main.cpp.o
+osmiArrow: CMakeFiles/osmiArrow.dir/mainNikkei.cpp.o
 osmiArrow: CMakeFiles/osmiArrow.dir/build.make
 osmiArrow: CMakeFiles/osmiArrow.dir/compiler_depend.ts
+osmiArrow: /home/loki/intel/oneapi/compiler/latest/lib/libiomp5.so
 osmiArrow: /usr/lib/x86_64-linux-gnu/libparquet.so.2300.1.0
 osmiArrow: /usr/lib/x86_64-linux-gnu/libarrow.so.2300.1.0
 osmiArrow: CMakeFiles/osmiArrow.dir/link.txt

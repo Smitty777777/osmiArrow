@@ -59,8 +59,7 @@ struct PCAResult {
     std::array<double, NFEATURES> pc1{};
 };
 
-std::vector<std::array<double, NFEATURES>> collectFeatures(
-    const std::vector<std::string>& paths)
+std::vector<std::array<double, NFEATURES>> collectFeatures(const std::vector<std::string>& paths)
 {
     std::vector<std::array<double, NFEATURES>> rows;
     rows.reserve(2'000'000);
@@ -182,7 +181,6 @@ std::array<std::array<double,BINS>,BINS> multiplyMatrix(const std::array<std::ar
         }
     return result;
 }
-
 
 int main() {
 

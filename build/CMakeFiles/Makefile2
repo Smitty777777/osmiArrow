@@ -63,10 +63,12 @@ CMAKE_BINARY_DIR = /home/loki/CLionProjects/osmiArrow/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
+all: CMakeFiles/osmi_arrow.dir/all
 all: CMakeFiles/osmiArrow.dir/all
 .PHONY : all
 
 # The main recursive "codegen" target.
+codegen: CMakeFiles/osmi_arrow.dir/codegen
 codegen: CMakeFiles/osmiArrow.dir/codegen
 .PHONY : codegen
 
@@ -75,14 +77,47 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
+clean: CMakeFiles/osmi_arrow.dir/clean
 clean: CMakeFiles/osmiArrow.dir/clean
 .PHONY : clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/osmi_arrow.dir
+
+# All Build rule for target.
+CMakeFiles/osmi_arrow.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/osmi_arrow.dir/build.make CMakeFiles/osmi_arrow.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/osmi_arrow.dir/build.make CMakeFiles/osmi_arrow.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/loki/CLionProjects/osmiArrow/build/CMakeFiles --progress-num= "Built target osmi_arrow"
+.PHONY : CMakeFiles/osmi_arrow.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/osmi_arrow.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/loki/CLionProjects/osmiArrow/build/CMakeFiles 0
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/osmi_arrow.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/loki/CLionProjects/osmiArrow/build/CMakeFiles 0
+.PHONY : CMakeFiles/osmi_arrow.dir/rule
+
+# Convenience name for target.
+osmi_arrow: CMakeFiles/osmi_arrow.dir/rule
+.PHONY : osmi_arrow
+
+# codegen rule for target.
+CMakeFiles/osmi_arrow.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/osmi_arrow.dir/build.make CMakeFiles/osmi_arrow.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/loki/CLionProjects/osmiArrow/build/CMakeFiles --progress-num= "Finished codegen for target osmi_arrow"
+.PHONY : CMakeFiles/osmi_arrow.dir/codegen
+
+# clean rule for target.
+CMakeFiles/osmi_arrow.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/osmi_arrow.dir/build.make CMakeFiles/osmi_arrow.dir/clean
+.PHONY : CMakeFiles/osmi_arrow.dir/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/osmiArrow.dir
 
 # All Build rule for target.
-CMakeFiles/osmiArrow.dir/all:
+CMakeFiles/osmiArrow.dir/all: CMakeFiles/osmi_arrow.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/osmiArrow.dir/build.make CMakeFiles/osmiArrow.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/osmiArrow.dir/build.make CMakeFiles/osmiArrow.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/loki/CLionProjects/osmiArrow/build/CMakeFiles --progress-num=1,2 "Built target osmiArrow"

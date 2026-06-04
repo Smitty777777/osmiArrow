@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/loki/CLionProjects/osmiArrow/main.cpp" "CMakeFiles/osmiArrow.dir/main.cpp.o" "gcc" "CMakeFiles/osmiArrow.dir/main.cpp.o.d"
+  "/home/loki/CLionProjects/osmiArrow/mainNikkei.cpp" "CMakeFiles/osmiArrow.dir/mainNikkei.cpp.o" "gcc" "CMakeFiles/osmiArrow.dir/mainNikkei.cpp.o.d"
   "" "osmiArrow" "gcc" "CMakeFiles/osmiArrow.dir/link.d"
   )
 

@@ -109,5 +109,6 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
+  "CMakeFiles/osmi_arrow.dir/DependInfo.cmake"
   "CMakeFiles/osmiArrow.dir/DependInfo.cmake"
   )

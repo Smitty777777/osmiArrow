@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/loki/CLionProjects/osmiArrow/include
+CXX_INCLUDES = -I/home/loki/CLionProjects/osmiArrow/include -I/home/loki/intel/oneapi/mkl/2026.0/include
 
-CXX_FLAGS = -std=gnu++20
+CXX_FLAGS = -std=gnu++20 -O3
 

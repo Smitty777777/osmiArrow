@@ -15,7 +15,8 @@ message(STATUS "MKLROOT: ${MKLROOT}")
 find_package(Arrow REQUIRED)
 find_package(Parquet REQUIRED)
 
-add_library(osmi_arrow INTERFACE)
+add_library(osmi_arrow INTERFACE
+        eminiDeals.cpp)
 target_include_directories(osmi_arrow INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${MKLROOT}/include
@@ -25,7 +26,8 @@ target_link_libraries(osmi_arrow INTERFACE
         Parquet::parquet_shared
 )
 
-add_executable(osmiArrow main.cpp)
+add_executable(osmiArrow
+        eminiDeals.cpp)
 
 set(IOMP5_LIB "$ENV{HOME}/intel/oneapi/compiler/latest/lib/libiomp5.so")
 

@@ -16,6 +16,7 @@
 #include <utility>
 #include <variant>
 #include <vector>
+#include <arrow/compute/api.h>
 
 namespace osmi {
 
@@ -141,6 +142,18 @@ public:
         _set(_ck(t_->AddColumn(t_->num_columns(), field, std::make_shared<arrow::ChunkedArray>(arr))));
         return *this;
     }
+    template <class... Preds> Table filter(Preds&&... preds) const {
+        arrow::BooleanBuilder mask;
+        _ck(mask.Reserve(t_->num_rows()));
+        for (auto&& bb : batches_)
+            for (int64_t i = 0; i < bb->num_rows(); ++i) {
+                Row r(bb.get(), i, &m_);
+                mask.UnsafeAppend((... && static_cast<bool>(preds(r))));   // empty pack -> true (keep all)
+            }
+        std::shared_ptr<arrow::Array> mask_arr; _ck(mask.Finish(&mask_arr));
+        auto out = _ck(arrow::compute::Filter(t_, mask_arr));
+        return Table(out.table());
+    }
 
     void to_parquet(const std::string& path, int64_t chunk_size = 1024 * 1024) const {
         auto out = _ck(arrow::io::FileOutputStream::Open(path));
@@ -208,7 +221,7 @@ private:
 class _ParquetRBR : public arrow::RecordBatchReader {
 public:
     _ParquetRBR(std::unique_ptr<parquet::arrow::FileReader> f, std::shared_ptr<arrow::RecordBatchReader> r) : f_(std::move(f)), r_(std::move(r)) {}
-    std::shared_ptr<arrow::Schema> schema() const override { return r_->schema(); }
+    [[nodiscard]]std::shared_ptr<arrow::Schema> schema() const override { return r_->schema(); }
     arrow::Status ReadNext(std::shared_ptr<arrow::RecordBatch>* b) override { return r_->ReadNext(b); }
 private:
     std::unique_ptr<parquet::arrow::FileReader> f_;
@@ -236,7 +249,7 @@ public:
         });
     }
 
-    LazyTable select(std::vector<std::string> cols) const {
+    [[nodiscard]]LazyTable select(std::vector<std::string>& cols) const {
         auto f = f_;
         return LazyTable([f, cols] {
             auto inner = f();
@@ -251,7 +264,7 @@ public:
                     for (int i : idx_) fv.push_back(s->field(i));
                     sc_ = arrow::schema(fv);
                 }
-                std::shared_ptr<arrow::Schema> schema() const override { return sc_; }
+                [[nodiscard]] std::shared_ptr<arrow::Schema> schema() const override { return sc_; }
                 arrow::Status ReadNext(std::shared_ptr<arrow::RecordBatch>* out) override {
                     std::shared_ptr<arrow::RecordBatch> b; ARROW_RETURN_NOT_OK(in_->ReadNext(&b));
                     if (!b) { *out = nullptr; return arrow::Status::OK(); }
@@ -266,7 +279,7 @@ public:
         });
     }
 
-    Table collect() const {
+    [[nodiscard]]Table collect() const {
         auto rd = f_();
         return Table(_ck(arrow::Table::FromRecordBatchReader(rd.get())));
     }
@@ -292,8 +305,8 @@ public:
         int64_t i_ = 0;
         std::shared_ptr<std::unordered_map<std::string, int>> m_;
     };
-    iterator begin() const { return iterator(f_()); }
-    iterator end() const { return iterator(); }
+    [[nodiscard]]iterator begin() const { return iterator(f_()); }
+    [[nodiscard]] iterator end() const { return iterator(); }
 
 private:
     explicit LazyTable(Factory f) : f_(std::move(f)) {}

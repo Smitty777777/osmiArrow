@@ -1,8 +1,8 @@
 [
 {
   "directory": "/home/loki/CLionProjects/osmiArrow/build",
-  "command": "/usr/bin/c++  -I/home/loki/CLionProjects/osmiArrow/include -std=gnu++20 -o CMakeFiles/osmiArrow.dir/main.cpp.o -c /home/loki/CLionProjects/osmiArrow/main.cpp",
-  "file": "/home/loki/CLionProjects/osmiArrow/main.cpp",
-  "output": "CMakeFiles/osmiArrow.dir/main.cpp.o"
+  "command": "/usr/bin/c++  -I/home/loki/CLionProjects/osmiArrow/include -I/home/loki/intel/oneapi/mkl/2026.0/include -std=gnu++20 -O3 -o CMakeFiles/osmiArrow.dir/mainNikkei.cpp.o -c /home/loki/CLionProjects/osmiArrow/mainNikkei.cpp",
+  "file": "/home/loki/CLionProjects/osmiArrow/mainNikkei.cpp",
+  "output": "CMakeFiles/osmiArrow.dir/mainNikkei.cpp.o"
 }
 ]

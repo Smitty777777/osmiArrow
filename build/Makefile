@@ -117,6 +117,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named osmi_arrow
+
+# Build rule for target.
+osmi_arrow: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 osmi_arrow
+.PHONY : osmi_arrow
+
+# fast build rule for target.
+osmi_arrow/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/osmi_arrow.dir/build.make CMakeFiles/osmi_arrow.dir/build
+.PHONY : osmi_arrow/fast
+
+#=============================================================================
 # Target rules for targets named osmiArrow
 
 # Build rule for target.
@@ -129,29 +142,29 @@ osmiArrow/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/osmiArrow.dir/build.make CMakeFiles/osmiArrow.dir/build
 .PHONY : osmiArrow/fast
 
-main.o: main.cpp.o
-.PHONY : main.o
+mainNikkei.o: mainNikkei.cpp.o
+.PHONY : mainNikkei.o
 
 # target to build an object file
-main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/osmiArrow.dir/build.make CMakeFiles/osmiArrow.dir/main.cpp.o
-.PHONY : main.cpp.o
+mainNikkei.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/osmiArrow.dir/build.make CMakeFiles/osmiArrow.dir/mainNikkei.cpp.o
+.PHONY : mainNikkei.cpp.o
 
-main.i: main.cpp.i
-.PHONY : main.i
+mainNikkei.i: mainNikkei.cpp.i
+.PHONY : mainNikkei.i
 
 # target to preprocess a source file
-main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/osmiArrow.dir/build.make CMakeFiles/osmiArrow.dir/main.cpp.i
-.PHONY : main.cpp.i
+mainNikkei.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/osmiArrow.dir/build.make CMakeFiles/osmiArrow.dir/mainNikkei.cpp.i
+.PHONY : mainNikkei.cpp.i
 
-main.s: main.cpp.s
-.PHONY : main.s
+mainNikkei.s: mainNikkei.cpp.s
+.PHONY : mainNikkei.s
 
 # target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/osmiArrow.dir/build.make CMakeFiles/osmiArrow.dir/main.cpp.s
-.PHONY : main.cpp.s
+mainNikkei.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/osmiArrow.dir/build.make CMakeFiles/osmiArrow.dir/mainNikkei.cpp.s
+.PHONY : mainNikkei.cpp.s
 
 # Help Target
 help:
@@ -162,9 +175,10 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... osmiArrow"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
+	@echo "... osmi_arrow"
+	@echo "... mainNikkei.o"
+	@echo "... mainNikkei.i"
+	@echo "... mainNikkei.s"
 .PHONY : help
 
 

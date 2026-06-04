@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/osmiArrow.dir/link.d"
-  "CMakeFiles/osmiArrow.dir/main.cpp.o"
-  "CMakeFiles/osmiArrow.dir/main.cpp.o.d"
+  "CMakeFiles/osmiArrow.dir/mainNikkei.cpp.o"
+  "CMakeFiles/osmiArrow.dir/mainNikkei.cpp.o.d"
   "osmiArrow"
   "osmiArrow.pdb"
 )
