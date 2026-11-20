@@ -22,7 +22,7 @@ struct Feature{
   std::size_t bins_count_ = 0;
   inline size_t BinValue(T value){
     value = std::clamp(value, lower_, upper_);
-    return static_cast<size_t>((value - lower_) * (bins_count_ / (upper_ - lower_)));
+    return std::min(bins_count_ - 1, static_cast<size_t>((value - lower_) * (bins_count_ / (upper_ - lower_))));
   }
 };
 
@@ -112,12 +112,11 @@ int main(){
 
   for (size_t r = 1; r < table.num_rows(); ++r){
     const auto& curr_row = table[r];
-    //prices
 
     const std::uint64_t time_curr = osmi::parse_epoch_ns(curr_row.get<std::string_view>("ts_event"));
     const std::uint64_t time_last = osmi::parse_epoch_ns(last_row.get<std::string_view>("ts_event"));
 
-    //100ms snapshots;
+    //1ms snapshot
     if (time_curr - time_last < osmi::milli_ns){ continue; }
 
     const double bid_px_curr = curr_row.get<double>("bid_px_00");
@@ -142,13 +141,14 @@ int main(){
 
     const std::uint64_t time_delta = time_curr - time_last;
 
-    if (mid_chg != 0.0){
-      //feature values
-      const size_t imbalance_bin = features.imbalance_.BinValue(imbalance_last);
-      const size_t spread_bin = spread_last > 0.25 ? 1 : 0;
+    const size_t imbalance_bin_last = features.imbalance_.BinValue(imbalance_last);
+    const size_t spread_bin_last = spread_last > 0.25 ? 1 : 0;
+    const size_t state_last = imbalance_bin_last * SPD_BINS + spread_bin_last;
+    transition_times[state_last] += time_delta;
 
-      state_midchg[imbalance_bin][spread_bin] += mid_chg;
-      state_frequencies[imbalance_bin][spread_bin] += 1;
+    if (mid_chg != 0.0){
+      state_midchg[imbalance_bin_last][spread_bin_last] += mid_chg;
+      state_frequencies[imbalance_bin_last][spread_bin_last] += 1;
       last_row = table[r];
       continue;
     }
@@ -156,53 +156,53 @@ int main(){
     const size_t imbalance_bin_curr = features.imbalance_.BinValue(imbalance_curr);
     const size_t spread_bin_curr = spread_curr > 0.25 ? 1 : 0;
 
-    const size_t imbalance_bin_last = features.imbalance_.BinValue(imbalance_last);
-    const size_t spread_bin_last = spread_last > 0.25 ? 1 : 0;
-
     //2 digit state, imbalance is 1st num and spread 2nd.
     // imbbin *= 2 + sprd bin is index for state value pair
     //
     // from->to
     //
-    transition_frequencies[imbalance_bin_last * SPD_BINS + spread_bin_last][imbalance_bin_curr * SPD_BINS + spread_bin_curr] += 1;
-    transition_times[imbalance_bin_last * SPD_BINS + spread_bin_last]  += time_delta;
+    const size_t state_curr = imbalance_bin_curr * SPD_BINS + spread_bin_curr;
+    if (state_last != state_curr){
+      transition_frequencies[state_last][state_curr] += 1;
+    }
 
     last_row = table[r];
   }
 
   AVX2Math::matrix<SPD_BINS * IMB_BINS, SPD_BINS * IMB_BINS> q_matrix;
-  AVX2Math::matrix<SPD_BINS * IMB_BINS, SPD_BINS * IMB_BINS> t_matrix;
-  AVX2Math::matrix<SPD_BINS * IMB_BINS, 1> midchg_matrix;
-  AVX2Math::matrix<SPD_BINS * IMB_BINS, 1> time_matrix;
+  AVX2Math::matrix<SPD_BINS * IMB_BINS, SPD_BINS * IMB_BINS> stopping_matrix;
+  AVX2Math::matrix<SPD_BINS * IMB_BINS, 1> reward_grid;
+  AVX2Math::matrix<SPD_BINS * IMB_BINS, 1> adjustment_grid;
 
   std::cout << "--time in state ij--\n";
   for (size_t i = 0; i < IMB_BINS; ++i){
     for (size_t s = 0; s < SPD_BINS; ++s){
-      std::uint64_t rowsum = std::accumulate(transition_frequencies[i * SPD_BINS + s].begin(), transition_frequencies[i * SPD_BINS + s].end(), std::uint64_t{0});
-      if (rowsum == 0){ continue; }
-      transition_times[i * SPD_BINS + s] /= rowsum;
-
-      std::cout << "state: " << i << s << " time: " << transition_times[i * SPD_BINS + s] << '\n';
+      const size_t index = i * SPD_BINS + s;
+      std::cout << "state: " << i << s << " time: " << static_cast<double>(transition_times[index]) / 1'000'000'000.0 << '\n';
     }
   }
 
-  std::cout <<"\n--transition matrix--\n"; //init qmatrix here too
+  std::cout <<"\n--generator matrix--\n";
   for (size_t i = 0; i < IMB_BINS * SPD_BINS; ++i){
-    std::uint64_t rowsum = std::accumulate(transition_frequencies[i].begin(), transition_frequencies[i].end(), std::uint64_t{0});
-    double exit_probability = 0;
-    if (rowsum == 0){ continue; }
+    const double seconds = static_cast<double>(transition_times[i]) / 1'000'000'000.0;
+    double exit_rate = 0.0;
     for (size_t j = 0; j < IMB_BINS * SPD_BINS; ++j){
-       t_matrix.data()[i * IMB_BINS * SPD_BINS + j] = static_cast<float>(transition_frequencies[i][j]) / static_cast<float>(rowsum);
-       std::cout <<  t_matrix.data()[i * IMB_BINS * SPD_BINS + j] << " ";
-
-       if (i != j){ exit_probability += t_matrix.data()[i * IMB_BINS * SPD_BINS + j]; } //ignore self transition
+      if (i != j && seconds > 0.0){
+        q_matrix.data()[i * IMB_BINS * SPD_BINS + j] = static_cast<float>(transition_frequencies[i][j] / seconds);
+        exit_rate += q_matrix.data()[i * IMB_BINS * SPD_BINS + j];
+      }
     }
-
-    const double exit_rate = 1.0 / (transition_times[i] * 1'000'000'000); //seconds
+    q_matrix.data()[i * IMB_BINS * SPD_BINS + i] = static_cast<float>(-exit_rate);
+    const double price_move_rate = seconds > 0.0
+      ? static_cast<double>(state_frequencies[i / SPD_BINS][i % SPD_BINS]) / seconds : 0.0;
     for (size_t j = 0; j < IMB_BINS * SPD_BINS; ++j){
-      q_matrix.data()[i * IMB_BINS * SPD_BINS + j] = exit_rate * t_matrix.data()[i * IMB_BINS * SPD_BINS + j] / exit_probability;
+      stopping_matrix.data()[i * IMB_BINS * SPD_BINS + j] = q_matrix.data()[i * IMB_BINS * SPD_BINS + j];
+      std::cout << q_matrix.data()[i * IMB_BINS * SPD_BINS + j] << " ";
     }
-    q_matrix.data()[i * IMB_BINS * SPD_BINS + i] = -exit_rate; //diag
+    stopping_matrix.data()[i * IMB_BINS * SPD_BINS + i] -= static_cast<float>(price_move_rate);
+    reward_grid.data()[i] = seconds > 0.0
+      ? static_cast<float>(state_midchg[i / SPD_BINS][i % SPD_BINS] / seconds) : 0.0f;
+    if (seconds == 0.0){ stopping_matrix.data()[i * IMB_BINS * SPD_BINS + i] = -1.0f; }
     std::cout << '\n';
   }
 
@@ -215,6 +215,17 @@ int main(){
       std::cout << "state: " << i << s << " midchg: " << state_midchg[i][s] << '\n';
     }
   }
+  //solve!
+  for (size_t i = 0; i < IMB_BINS * SPD_BINS; ++i){
+    for (size_t j = 0; j < IMB_BINS * SPD_BINS; ++j){
+      stopping_matrix.data()[i * IMB_BINS * SPD_BINS + j] *= -1.0f;
+    }
+  }
+  const auto inverse = AVX2Math::AVX2Inverse(stopping_matrix);
+  if (!inverse){ throw std::runtime_error("CTMC stopping matrix is singular"); }
+  adjustment_grid = AVX2Math::AVX2Dot(*inverse, reward_grid);
+
+
 
   return 0;
 }
