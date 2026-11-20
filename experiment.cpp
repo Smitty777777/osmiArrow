@@ -13,7 +13,7 @@
 #include <flat_map>
 
 constexpr size_t SPD_BINS = 2;
-constexpr size_t IMB_BINS = 10;
+constexpr size_t IMB_BINS = 5;
 
 template<typename T> requires (std::is_arithmetic_v<T>)
 struct Feature{
@@ -118,6 +118,7 @@ int main(){
     const std::uint64_t time_last = osmi::parse_epoch_ns(last_row.get<std::string_view>("ts_event"));
 
     //100ms snapshots;
+    if (time_curr - time_last < osmi::milli_ns){ continue; }
 
     const double bid_px_curr = curr_row.get<double>("bid_px_00");
     const double ask_px_curr = curr_row.get<double>("ask_px_00");
@@ -185,14 +186,23 @@ int main(){
     }
   }
 
-  std::cout <<"\n--transition matrix--\n";
+  std::cout <<"\n--transition matrix--\n"; //init qmatrix here too
   for (size_t i = 0; i < IMB_BINS * SPD_BINS; ++i){
     std::uint64_t rowsum = std::accumulate(transition_frequencies[i].begin(), transition_frequencies[i].end(), std::uint64_t{0});
+    double exit_probability = 0;
     if (rowsum == 0){ continue; }
     for (size_t j = 0; j < IMB_BINS * SPD_BINS; ++j){
        t_matrix.data()[i * IMB_BINS * SPD_BINS + j] = static_cast<float>(transition_frequencies[i][j]) / static_cast<float>(rowsum);
        std::cout <<  t_matrix.data()[i * IMB_BINS * SPD_BINS + j] << " ";
+
+       if (i != j){ exit_probability += t_matrix.data()[i * IMB_BINS * SPD_BINS + j]; } //ignore self transition
     }
+
+    const double exit_rate = 1.0 / (transition_times[i] * 1'000'000'000); //seconds
+    for (size_t j = 0; j < IMB_BINS * SPD_BINS; ++j){
+      q_matrix.data()[i * IMB_BINS * SPD_BINS + j] = exit_rate * t_matrix.data()[i * IMB_BINS * SPD_BINS + j] / exit_probability;
+    }
+    q_matrix.data()[i * IMB_BINS * SPD_BINS + i] = -exit_rate; //diag
     std::cout << '\n';
   }
 
@@ -205,7 +215,6 @@ int main(){
       std::cout << "state: " << i << s << " midchg: " << state_midchg[i][s] << '\n';
     }
   }
-
 
   return 0;
 }
