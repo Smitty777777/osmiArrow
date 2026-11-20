@@ -148,7 +148,7 @@ public:
         for (auto&& bb : batches_)
             for (int64_t i = 0; i < bb->num_rows(); ++i) {
                 Row r(bb.get(), i, &m_);
-                mask.UnsafeAppend((... && static_cast<bool>(preds(r))));   // empty pack -> true (keep all)
+                mask.UnsafeAppend((... && static_cast<bool>(preds(r))));   //empty pack = true (keep all)
             }
         std::shared_ptr<arrow::Array> mask_arr; _ck(mask.Finish(&mask_arr));
         auto out = _ck(arrow::compute::Filter(t_, mask_arr));
