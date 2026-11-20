@@ -1,18 +1,18 @@
 #include "include/osmi/arrow.hpp"
+#include "include/osmi/matrix.hpp"
 #include <algorithm>
 #include <array>
 #include <arrow/csv/options.h>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <numeric>
 #include <string>
 #include <string_view>
 #include <type_traits>
 #include <flat_map>
 
-constexpr unsigned int N_COLS = 5;
-constexpr unsigned int N_BINS = 10;
-constexpr unsigned int N_FEATURES = 2;
+
 
 template<typename T> requires (std::is_arithmetic_v<T>)
 struct Feature{
@@ -26,8 +26,8 @@ struct Feature{
 };
 
 struct Features{
-  Feature<double> imbalance_ { 0.0, 1.0, 10 }; //0.2 bins
-  Feature<double> spread_ { 0.0, 0.51, 2}; //1/>=2 tick spreads
+  Feature<double> imbalance_ { 0.0, 1.0, 10 }; //0.2 bin
+
 } features;
 
 namespace osmi{
@@ -88,9 +88,12 @@ namespace osmi{
   }
 }
 
-std::flat_map<std::array<size_t, N_FEATURES>, double> state_midchg;
-std::flat_map<std::array<size_t, N_FEATURES>, std::uint64_t> state_times;
-std::flat_map<std::array<size_t, N_FEATURES>, std::uint64_t> state_frequencies;
+std::array<std::array<double, 2>, 10> state_midchg;
+std::array<std::array<std::uint64_t, 2>, 10>  state_frequencies;
+
+std::array<std::array<std::uint64_t, 2*9>,2*10> transition_frequencies;
+std::array<std::uint64_t, 2*10> transition_times;
+
 
 int main(){
 
@@ -104,22 +107,11 @@ int main(){
   table = table.filter([](const osmi::Row& row){ return row.get<std::string_view>("symbol") == "ESZ5"; });
 
 
-  for (size_t s = 0; s < features.spread_.bins_count_; ++s){
-    for (size_t i = 0; i < features.imbalance_.bins_count_; ++i){
-      state_midchg.insert({{i, s}, 0.0});
-      state_frequencies.insert({{i, s}, 0});
-      state_times.insert({{i, s}, 0});
-    }
-  }
-
-
   osmi::Row last_row = table[0];
 
   for (size_t r = 1; r < table.num_rows(); ++r){
     const auto& curr_row = table[r];
     //prices
-    const std::string_view symbol = curr_row.get<std::string_view>("symbol");
-
 
     const std::uint64_t time_curr = osmi::parse_epoch_ns(curr_row.get<std::string_view>("ts_event"));
     const std::uint64_t time_last = osmi::parse_epoch_ns(last_row.get<std::string_view>("ts_event"));
@@ -140,44 +132,62 @@ int main(){
     const double mid_px_last = (bid_px_last + ask_px_last) / 2.0;
     const double mid_chg = mid_px_curr - mid_px_last;
 
-    if (mid_px_curr == mid_px_last){
+    const double imbalance_curr = static_cast<double>(bid_sz_curr) / (bid_sz_curr + ask_sz_curr);
+    const double imbalance_last = static_cast<double>(bid_sz_last) / (bid_sz_last + ask_sz_last);
+
+    const double spread_curr = ask_px_curr - bid_px_curr;
+    const double spread_last = ask_px_last - bid_px_last;
+
+    const std::uint64_t time_delta = time_curr - time_last;
+
+    if (mid_chg != 0.0){
+      //feature values
+      const size_t imbalance_bin = features.imbalance_.BinValue(imbalance_last);
+      const size_t spread_bin = spread_last > 0.25 ? 1 : 0;
+
+      state_midchg[imbalance_bin][spread_bin] += mid_chg;
+      state_frequencies[imbalance_bin][spread_bin] += 1;
+      last_row = table[r];
       continue;
     }
 
-    //feature values
-    const double imbalance = static_cast<double>(bid_sz_last) / (bid_sz_last + ask_sz_last);
-    const double spread = ask_px_last - bid_px_last;
-    const std::uint64_t time_delta = time_curr - time_last;
+    const size_t imbalance_bin_curr = features.imbalance_.BinValue(imbalance_curr);
+    const size_t spread_bin_curr = spread_curr > 0.25 ? 1 : 0;
 
-    const size_t imbalance_bin = features.imbalance_.BinValue(imbalance);
-    const size_t spread_bin = features.spread_.BinValue(spread);
+    const size_t imbalance_bin_last = features.imbalance_.BinValue(imbalance_last);
+    const size_t spread_bin_last = spread_last > 0.25 ? 1 : 0;
 
-    state_frequencies[{imbalance_bin, spread_bin}] += 1;
-    state_times[{imbalance_bin, spread_bin}] += time_delta;
-    state_midchg[{imbalance_bin, spread_bin}] += mid_chg;
+    //2 digit state, imbalance is 1st num and spread 2nd.
+    // imbbin *= 2 + sprd bin is index for state value pair
+    //
+    // from->to
+    //
+    transition_frequencies[imbalance_bin_last * 2 + spread_bin_last][imbalance_bin_curr * 2 + spread_bin_curr] += 1;
+    transition_times[imbalance_bin_last * 2 + spread_bin_last]  += time_delta;
 
     last_row = table[r];
   }
 
   std::cout << "--time in state ij--\n";
-  for (auto it = state_times.begin(); it != state_times.end(); ++it){
-    if (state_frequencies.at(it->first) != 0){
-      it->second /= state_frequencies.at(it->first);
+  for (size_t i = 0; i < 10; ++i){
+    for (size_t s = 0; s < 2; ++s){
+      size_t rowsum = std::accumulate(transition_frequencies[i * 2 + s].begin(), transition_frequencies[i * 2 + s].end(), std::uint64_t{0});
+      if (rowsum == 0){ continue; }
+      transition_times[i * 2 + s] /= rowsum;
+
+      std::cout << "state: " << i << s << " time: " << transition_times[i * 2 + s] << '\n';
     }
-    else{
-      it->second = 0;
-    }
-    std::cout << "state: " << it->first[0] << it->first[1] << " time: " << it->second << '\n';
   }
+
   std::cout << "--E(dmid)_t+1 in state ij--\n";
-  for (auto it = state_midchg.begin(); it != state_midchg.end(); ++it){
-    if (state_frequencies.at(it->first) != 0){
-      it->second /= state_frequencies.at(it->first);
+  for (size_t i = 0; i < 10; ++i){
+    for (size_t s = 0; s < 2; ++s){
+      if (state_frequencies[i][s] != 0){
+        state_midchg[i][s] /= state_frequencies[i][s];
+      }
+      std::cout << "state: " << i << s << " midchg: " << state_midchg[i][s] << '\n';
     }
-    else{
-      it->second = 0.0;
-    }
-    std::cout << "state: " << it->first[0] << it->first[1] << " time: " << it->second << '\n';
   }
+
   return 0;
 }
