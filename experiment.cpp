@@ -12,7 +12,8 @@
 #include <type_traits>
 #include <flat_map>
 
-
+constexpr size_t SPD_BINS = 2;
+constexpr size_t IMB_BINS = 10;
 
 template<typename T> requires (std::is_arithmetic_v<T>)
 struct Feature{
@@ -26,7 +27,7 @@ struct Feature{
 };
 
 struct Features{
-  Feature<double> imbalance_ { 0.0, 1.0, 10 }; //0.2 bin
+  Feature<double> imbalance_ { 0.0, 1.0, IMB_BINS }; //0.2 bin
 
 } features;
 
@@ -88,11 +89,11 @@ namespace osmi{
   }
 }
 
-std::array<std::array<double, 2>, 10> state_midchg;
-std::array<std::array<std::uint64_t, 2>, 10>  state_frequencies;
+std::array<std::array<double, SPD_BINS>, IMB_BINS> state_midchg;
+std::array<std::array<std::uint64_t, SPD_BINS>, IMB_BINS>  state_frequencies;
 
-std::array<std::array<std::uint64_t, 2*9>,2*10> transition_frequencies;
-std::array<std::uint64_t, 2*10> transition_times;
+std::array<std::array<std::uint64_t, SPD_BINS * IMB_BINS>, SPD_BINS * IMB_BINS > transition_frequencies;
+std::array<std::uint64_t, SPD_BINS * IMB_BINS> transition_times;
 
 
 int main(){
@@ -162,32 +163,49 @@ int main(){
     //
     // from->to
     //
-    transition_frequencies[imbalance_bin_last * 2 + spread_bin_last][imbalance_bin_curr * 2 + spread_bin_curr] += 1;
-    transition_times[imbalance_bin_last * 2 + spread_bin_last]  += time_delta;
+    transition_frequencies[imbalance_bin_last * SPD_BINS + spread_bin_last][imbalance_bin_curr * SPD_BINS + spread_bin_curr] += 1;
+    transition_times[imbalance_bin_last * SPD_BINS + spread_bin_last]  += time_delta;
 
     last_row = table[r];
   }
 
-  std::cout << "--time in state ij--\n";
-  for (size_t i = 0; i < 10; ++i){
-    for (size_t s = 0; s < 2; ++s){
-      size_t rowsum = std::accumulate(transition_frequencies[i * 2 + s].begin(), transition_frequencies[i * 2 + s].end(), std::uint64_t{0});
-      if (rowsum == 0){ continue; }
-      transition_times[i * 2 + s] /= rowsum;
+  AVX2Math::matrix<SPD_BINS * IMB_BINS, SPD_BINS * IMB_BINS> q_matrix;
+  AVX2Math::matrix<SPD_BINS * IMB_BINS, SPD_BINS * IMB_BINS> t_matrix;
+  AVX2Math::matrix<SPD_BINS * IMB_BINS, 1> midchg_matrix;
+  AVX2Math::matrix<SPD_BINS * IMB_BINS, 1> time_matrix;
 
-      std::cout << "state: " << i << s << " time: " << transition_times[i * 2 + s] << '\n';
+  std::cout << "--time in state ij--\n";
+  for (size_t i = 0; i < IMB_BINS; ++i){
+    for (size_t s = 0; s < SPD_BINS; ++s){
+      std::uint64_t rowsum = std::accumulate(transition_frequencies[i * SPD_BINS + s].begin(), transition_frequencies[i * SPD_BINS + s].end(), std::uint64_t{0});
+      if (rowsum == 0){ continue; }
+      transition_times[i * SPD_BINS + s] /= rowsum;
+
+      std::cout << "state: " << i << s << " time: " << transition_times[i * SPD_BINS + s] << '\n';
     }
   }
 
+  std::cout <<"\n--transition matrix--\n";
+  for (size_t i = 0; i < IMB_BINS * SPD_BINS; ++i){
+    std::uint64_t rowsum = std::accumulate(transition_frequencies[i].begin(), transition_frequencies[i].end(), std::uint64_t{0});
+    if (rowsum == 0){ continue; }
+    for (size_t j = 0; j < IMB_BINS * SPD_BINS; ++j){
+       t_matrix.data()[i * IMB_BINS * SPD_BINS + j] = static_cast<float>(transition_frequencies[i][j]) / static_cast<float>(rowsum);
+       std::cout <<  t_matrix.data()[i * IMB_BINS * SPD_BINS + j] << " ";
+    }
+    std::cout << '\n';
+  }
+
   std::cout << "--E(dmid)_t+1 in state ij--\n";
-  for (size_t i = 0; i < 10; ++i){
-    for (size_t s = 0; s < 2; ++s){
+  for (size_t i = 0; i < IMB_BINS; ++i){
+    for (size_t s = 0; s < SPD_BINS; ++s){
       if (state_frequencies[i][s] != 0){
         state_midchg[i][s] /= state_frequencies[i][s];
       }
       std::cout << "state: " << i << s << " midchg: " << state_midchg[i][s] << '\n';
     }
   }
+
 
   return 0;
 }
