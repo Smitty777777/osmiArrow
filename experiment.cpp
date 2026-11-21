@@ -13,7 +13,7 @@
 #include <flat_map>
 
 constexpr size_t SPD_BINS = 2;
-constexpr size_t IMB_BINS = 5;
+constexpr size_t IMB_BINS = 10;
 
 template<typename T> requires (std::is_arithmetic_v<T>)
 struct Feature{
@@ -101,7 +101,7 @@ int main(){
   auto convert = arrow::csv::ConvertOptions::Defaults();
   convert.column_types["ts_event"] = arrow::utf8();
 
-  auto table = osmi::Table::from_csv("/home/user/Desktop/tempData/glbx-mdp3-20251020.mbp-1.csv");
+  auto table = osmi::Table::from_csv("/home/user/Desktop/tempData/glbx-mdp3-20251030.mbp-1.csv");
   const std::string symbol = "ESZ5";
 
   table = table.select({"bid_px_00", "ask_px_00", "bid_sz_00", "ask_sz_00", "ts_event", "symbol"});
@@ -116,8 +116,6 @@ int main(){
     const std::uint64_t time_curr = osmi::parse_epoch_ns(curr_row.get<std::string_view>("ts_event"));
     const std::uint64_t time_last = osmi::parse_epoch_ns(last_row.get<std::string_view>("ts_event"));
 
-    //1ms snapshot
-    if (time_curr - time_last < osmi::milli_ns){ continue; }
 
     const double bid_px_curr = curr_row.get<double>("bid_px_00");
     const double ask_px_curr = curr_row.get<double>("ask_px_00");
@@ -149,8 +147,8 @@ int main(){
     if (mid_chg != 0.0){
       state_midchg[imbalance_bin_last][spread_bin_last] += mid_chg;
       state_frequencies[imbalance_bin_last][spread_bin_last] += 1;
-      last_row = table[r];
-      continue;
+      //last_row = table[r];
+      //continue;
     }
 
     const size_t imbalance_bin_curr = features.imbalance_.BinValue(imbalance_curr);
@@ -216,16 +214,63 @@ int main(){
     }
   }
   //solve!
-  for (size_t i = 0; i < IMB_BINS * SPD_BINS; ++i){
-    for (size_t j = 0; j < IMB_BINS * SPD_BINS; ++j){
-      stopping_matrix.data()[i * IMB_BINS * SPD_BINS + j] *= -1.0f;
+  //for (size_t i = 0; i < IMB_BINS * SPD_BINS; ++i){
+    //for (size_t j = 0; j < IMB_BINS * SPD_BINS; ++j){
+      //stopping_matrix.data()[i * IMB_BINS * SPD_BINS + j] *= -1.0f;
+      //}
+    //}
+  //const auto inverse = AVX2Math::AVX2Inverse(stopping_matrix);
+  //if (!inverse){ throw std::runtime_error("CTMC stopping matrix is singular"); }
+  //adjustment_grid = AVX2Math::AVX2Dot(*inverse, reward_grid);
+
+  constexpr std::size_t N = IMB_BINS * SPD_BINS;
+  constexpr double horizon = 1.0;  // seconds
+  using Grid = std::array<double, N>;
+
+  double max_exit_rate = 0.0;
+  for (std::size_t i = 0; i < N; ++i) {
+    max_exit_rate = std::max(max_exit_rate, -double(q_matrix(i, i)));
+  }
+  const auto steps = static_cast<std::size_t>(
+      std::max(1.0, std::ceil(4.0 * horizon * max_exit_rate)));
+  const double dt = horizon / static_cast<double>(steps);
+
+  const auto slope = [&](const Grid& g) {
+    Grid result{};
+    for (std::size_t i = 0; i < N; ++i) {
+      result[i] = reward_grid(i, 0);
+      for (std::size_t j = 0; j < N; ++j) {
+        result[i] += q_matrix(i, j) * g[j];
+      }
+    }
+    return result;
+  };
+
+  const auto shifted = [](Grid g, const Grid& k, double step) {
+    for (std::size_t i = 0; i < N; ++i) {
+      g[i] += step * k[i];
+    }
+    return g;
+  };
+
+  Grid g{};
+  for (std::size_t step = 0; step < steps; ++step) {
+    const auto k1 = slope(g);
+    const auto k2 = slope(shifted(g, k1, dt / 2.0));
+    const auto k3 = slope(shifted(g, k2, dt / 2.0));
+    const auto k4 = slope(shifted(g, k3, dt));
+    for (std::size_t i = 0; i < N; ++i) {
+      g[i] += (dt / 6.0) * (k1[i] + 2.0 * k2[i] + 2.0 * k3[i] + k4[i]);
     }
   }
-  const auto inverse = AVX2Math::AVX2Inverse(stopping_matrix);
-  if (!inverse){ throw std::runtime_error("CTMC stopping matrix is singular"); }
-  adjustment_grid = AVX2Math::AVX2Dot(*inverse, reward_grid);
+
+  for (std::size_t i = 0; i < N; ++i) {
+    adjustment_grid(i, 0) = static_cast<float>(g[i]);
+  }
 
 
-
+  for (std::size_t i = 0; i < adjustment_grid.size(); ++i){
+    std::cout << "state: " << i << "adj: " << adjustment_grid.data()[i] << "\n";
+  }
   return 0;
 }
