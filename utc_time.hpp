@@ -1,3 +1,9 @@
+#ifndef TIME_HPP
+#define TIME_HPP
+#include <cstddef>
+#include <string_view>
+#include <cstdint>
+
 namespace osmi{
   constexpr std::uint64_t micro_ns = 1000;
   constexpr std::uint64_t milli_ns = micro_ns * 1000;
@@ -55,3 +61,5 @@ namespace osmi{
     return date_ns + day_ns + ns;
   }
 }
+
+#endif
